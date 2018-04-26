@@ -5,6 +5,7 @@ from collections import OrderedDict
 
 import io
 
+
 def read_block(text_list):
     block = []
     block_found = False
