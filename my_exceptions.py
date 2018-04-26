@@ -1,0 +1,2 @@
+class TriggerSyntaxException(Exception):
+    pass
