@@ -97,9 +97,3 @@ ENV/
 
 # mypy
 .mypy_cache/
-
-# Pycharm
-.idea
-.idea\workspace.xml
-.idea/workspace.xml
-.idea/workspace.xml
