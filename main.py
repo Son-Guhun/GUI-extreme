@@ -1,6 +1,6 @@
+import easygui
 from my_exceptions import TriggerSyntaxException
-from classes import *
-
+import editorobjects as weobj
 from collections import OrderedDict
 
 import io
@@ -45,16 +45,16 @@ while True:
     else:
         break
 
-data = {}
+data = OrderedDict()
 for we_type in blocks:
-    if we_type in my_dict:
-        data[we_type] = {}
-        for block in blocks[we_type]:
-            # print block
-            temp = b(my_dict[we_type], block)
-            data[we_type][temp.name] = temp
+    try:
+        parser = weobj.TriggerEditorObjectParser(we_type)
+    except TriggerSyntaxException:
+        continue
+    data[we_type] = OrderedDict()
+    for block in blocks[we_type]:
+        temp = parser.parse_block_to_object(block)
+        data[we_type][temp.name] = temp
 
-
-
-
-
+a = data.keys()
+easygui.choicebox('Hello', 'Choices', data[a[1]].keys())
