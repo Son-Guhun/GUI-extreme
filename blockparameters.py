@@ -52,7 +52,7 @@ class ParamCategory(BlockParameter):
         self._data = TriggerEditorObject.get_object_from_name(string)
 
     def __str__(self):
-        pass
+        return self._data.name
 
     def __eq__(self, other):
         return self._data == other
