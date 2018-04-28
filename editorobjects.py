@@ -1,6 +1,10 @@
+from typing import Dict, Iterator
+
 from my_collections import NameTracker, ValidatedDict
 from collections import OrderedDict
-from my_exceptions import TriggerSyntaxException
+from my_exceptions import TriggerSyntaxException, TriggerObjectInUseException
+
+import abc
 
 
 # ======================================================================================================================
@@ -28,15 +32,21 @@ def get_line_param(line):
 class TriggerEditorObject(object):
 
     _instances = NameTracker()
+    _class_sets = {}  # type: Dict[class, set]
 
     def __init__(self, **kwargs):
         super(TriggerEditorObject, self).__init__()
 
         self._name = kwargs['name']
         self._instances[self._name] = self
+        self._class_sets[type(self)].add(self)
 
     def __del__(self):
+        self.remove()
+
+    def remove(self):
         del self._instances[self._name]
+        self._class_sets[type(self)].remove(self)
 
     @property
     def name(self):
@@ -49,6 +59,24 @@ class TriggerEditorObject(object):
         self._instances[new_name] = self  # Exception will be raised if the symbol is already taken.
         self.__del__()
         self._name = new_name
+
+    @classmethod
+    def get_class_instances(cls):
+        return cls._class_sets[cls]
+
+    @classmethod
+    def get_subclasses(cls):
+        for subclass in cls.__subclasses__():
+            for subsubclass in subclass.get_subclasses():
+                yield subsubclass
+            yield subclass
+
+    @classmethod
+    def get_object_from_name(cls, name):
+        try:
+            return cls._instances[name]
+        except KeyError:
+            raise TriggerSyntaxException('Symbol '+name+' is not defined.')
 
     @staticmethod
     def parse_from_text(block):
@@ -80,21 +108,23 @@ BLOCK_PARAMETERS_ALL = {'Defaults', 'Limits', 'Category', 'ScriptName'}
 BLOCK_PARAMETERS_NO_SCRIPTNAME = BLOCK_PARAMETERS_ALL - {'ScriptName'}
 
 
+from blockparameters import parse_block_parameter
 class TriggerEditorFunction(TriggerEditorObject):
 
     _VALID_BLOCK_PARAMETERS = BLOCK_PARAMETERS_ALL
 
     def __init__(self, **kwargs):
-        super(TriggerEditorFunction, self).__init__(**kwargs)
-
         self.block_params = ValidatedDict(self._VALID_BLOCK_PARAMETERS)
         for param in self._VALID_BLOCK_PARAMETERS:
             if param in kwargs:
                 self.block_params[param] = kwargs[param]
 
-    def supports(self, keyword_arg):
+        super(TriggerEditorFunction, self).__init__(**kwargs)
+
+    @classmethod
+    def supports(cls, keyword_arg):
         # type: (basestring) -> bool
-        return keyword_arg in type(self)._VALID_BLOCK_PARAMETERS
+        return keyword_arg in cls._VALID_BLOCK_PARAMETERS
 
     @staticmethod
     def parse_from_text(block):
@@ -102,13 +132,25 @@ class TriggerEditorFunction(TriggerEditorObject):
         kwargs = super(TriggerEditorFunction, TriggerEditorFunction).parse_from_text(block)
 
         for line in block[1:]:
-            kwargs[get_line_param(line)] = get_line_data(line)
-
-        for param in ('Defaults', 'Limits'):
-            if param in kwargs:
-                kwargs[param] = kwargs[param].split(',')
+            param = get_line_param(line)
+            kwargs[param] = parse_block_parameter(param, get_line_data(line))
 
         return kwargs
+
+
+class TriggerEditorReferable:
+    """
+    An abstract class that represents an object which can be referenced by other objects within TriggerData.txt.
+    """
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def is_referenced(self):
+        pass
+
+    @abc.abstractmethod
+    def get_references(self):
+        pass
 
 
 # endregion
@@ -117,7 +159,7 @@ class TriggerEditorFunction(TriggerEditorObject):
 #
 # These classes represent a single kind of object in the Trigger Editor.
 # ======================================================================================================================
-class TriggerCategory(TriggerEditorObject):
+class TriggerCategory(TriggerEditorObject, TriggerEditorReferable):
     """
     [TriggerCategories]
         Defines categories for organizing trigger functions
@@ -132,6 +174,36 @@ class TriggerCategory(TriggerEditorObject):
         self.display_text = kwargs['display_text']
         self.icon = kwargs['icon']
         self.disable_display = kwargs['disable_display'] if 'disable_display' in kwargs else 0
+
+    @staticmethod
+    def _get_functions():
+        # type: () -> Iterator[TriggerEditorFunction]
+        function_classes = [TriggerEditorFunction] + list(TriggerEditorFunction.get_subclasses())
+
+        for class_ in function_classes:
+            if class_.supports('Category'):
+                for function_ in class_.get_class_instances():
+                    yield function_
+
+    def is_referenced(self):
+        for function_ in self._get_functions():
+            if function_.block_params['Category'] == self:
+                return True
+        return False
+
+    def get_references(self):
+        result = set()
+
+        for function_ in self._get_functions():
+            if function_.block_params['Category'] == self:
+                result.add(function_)
+        return result
+
+    def remove(self):
+        used_in = self.get_references()
+        if used_in:
+            raise TriggerObjectInUseException('Cannot remove '+self._name+' because it is referenced.', used_in)
+        super(TriggerCategory, self).remove()
 
     @staticmethod
     def parse_from_text(block):
@@ -284,3 +356,8 @@ class TriggerEditorObjectParser(object):
         self._type_name = string
 # endregion
 # ======================================================================================================================
+
+
+for subclass_ in TriggerEditorObject.get_subclasses():
+    TriggerEditorObject._class_sets[subclass_] = set()
+    TriggerEditorObject._class_sets[TriggerEditorObject] = set()
