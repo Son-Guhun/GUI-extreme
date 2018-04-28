@@ -53,8 +53,18 @@ for we_type in blocks:
         continue
     data[we_type] = OrderedDict()
     for block in blocks[we_type]:
-        temp = parser.parse_block_to_object(block)
+        # temp = parser.parse_block_to_object(block)
+        try:
+            temp = parser.parse_block_to_object(block)
+        except TriggerSyntaxException as e:
+            print block
+            print e.message
+            continue
         data[we_type][temp.name] = temp
 
 a = data.keys()
 easygui.choicebox('Hello', 'Choices', data[a[1]].keys())
+
+for name in data['TriggerCategories']:
+    print name
+    print data['TriggerCategories'][name].is_referenced()
