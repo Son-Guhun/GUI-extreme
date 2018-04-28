@@ -1,5 +1,6 @@
 from my_exceptions import TriggerSyntaxException
 import collections
+import warnings
 
 
 class NameTracker(collections.MutableMapping):
@@ -48,29 +49,56 @@ class ValidatedDict(collections.MutableMapping):
     """
     A dictionary which has a set of valid keys. If an attempt is made to add a key that is not in the set of valid keys,
     a TriggerSyntaxException is raised.
+
+    The valid keys container does not
     """
-    def __init__(self, valid_keys, map=None):
+
+    # # noinspection PyClassHasNoInit
+    # class __UninitializedValue:
+    #     def __len__(self):
+    #         return 0
+    #
+    # _UNINITIALIZED_VALUE = __UninitializedValue()
+    UNINITIALIZED_VALUE = None
+
+    def __init__(self, valid_keys, map_=None):
         self._map = {}
         self._valid_keys = valid_keys
 
-        if map:
-            for key in map:
-                self[key] = map[key]
+        if map_:
+            for key in map_:
+                self[key] = map_[key]
 
+    # region Implementation comment:
+    # ------------
+    # Returning None for keys that are valid but are not in _map
+    # Vs.
+    # Raising KeyError for valid keys that aren't in _map
+    # ------------
+    # Raising a KeyError would make ValidatedDict behave like a built-in dict. However, the second implementation was
+    # chosen because it's more convenient to use in code and makes ValidatedDict behave as if it were an object with
+    # defined members.
+    # endregion
     def __getitem__(self, key):
         if key not in self._valid_keys:
-            raise TriggerSyntaxException("'"+key+"'is not a valid argument.")
-        return self._map[key]
+            raise TriggerSyntaxException("'"+str(key)+"'is not a valid argument.")
+        try:
+            return self._map[key]
+        except KeyError:
+            return self.UNINITIALIZED_VALUE
 
     def __setitem__(self, key, value):
         if key not in self._valid_keys:
-            raise TriggerSyntaxException("'"+key+"'is not a valid argument.")
+            raise TriggerSyntaxException("'"+str(key)+"'is not a valid argument.")
         self._map[key] = value
 
     def __delitem__(self, key):
         if key not in self._valid_keys:
-            raise TriggerSyntaxException("'"+key+"'is not a valid argument.")
-        del self._map[key]
+            raise TriggerSyntaxException("'"+str(key)+"'is not a valid argument.")
+        try:
+            del self._map[key]
+        except KeyError:
+            warnings.warn('Deleted an uninitialized key '+str(key)+' in '+str(self), RuntimeWarning)
 
     def __iter__(self):
         for key in self._map:
@@ -84,3 +112,8 @@ class ValidatedDict(collections.MutableMapping):
 
     def __repr__(self):
         return str(self)
+
+    def __contains__(self, key):
+        if key not in self._valid_keys:
+            raise TriggerSyntaxException("'"+str(key)+"'is not a valid argument.")
+        return key in self._map
