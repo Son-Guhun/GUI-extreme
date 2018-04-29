@@ -1,3 +1,5 @@
+from collections import Iterator
+
 from utilities import get_line_param, get_line_data
 from my_collections import ValidatedDict
 from we_object import TriggerEditorObject
@@ -17,6 +19,11 @@ class TriggerEditorFunction(TriggerEditorObject):
             if param in kwargs:
                 self.block_params[param] = kwargs[param]
 
+        try:
+            self.argument_types = kwargs['argument_types']
+        except KeyError:
+            self.argument_types = []
+
         super(TriggerEditorFunction, self).__init__(**kwargs)
 
     @classmethod
@@ -34,3 +41,17 @@ class TriggerEditorFunction(TriggerEditorObject):
             kwargs[param] = parse_block_parameter(param, get_line_data(line))
 
         return kwargs
+
+
+# ======================================================================================================================
+# Utilities
+# ======================================================================================================================
+
+def iter_all_functions():
+    # type: () -> Iterator[TriggerEditorFunction]
+    function_classes = [TriggerEditorFunction] + list(TriggerEditorFunction.get_subclasses())
+
+    for class_ in function_classes:
+        if class_.supports('Category'):
+            for function_ in class_.get_class_instances():
+                yield function_

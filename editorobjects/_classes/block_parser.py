@@ -1,6 +1,7 @@
 from collections import OrderedDict
 
 from my_exceptions import TriggerSyntaxException
+from we_type import TriggerType
 from we_call import TriggerCall
 from we_action import TriggerAction
 from we_category import TriggerCategory
@@ -10,7 +11,7 @@ from we_condition import TriggerCondition
 class TriggerEditorObjectParser(object):
     _DICT_STR2CLASS = OrderedDict({
         u'TriggerCategories': TriggerCategory,
-        # u'TriggerTypes':             None,
+        u'TriggerTypes':             TriggerType,
         # u'TriggerTypeDefaults':      None,
         # u'TriggerParams':            None,
         # u'TriggerEvents':            None,

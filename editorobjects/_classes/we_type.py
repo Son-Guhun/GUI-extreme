@@ -1,3 +1,4 @@
+from we_function import iter_all_functions
 from utilities import get_line_data
 from we_object import TriggerEditorObject
 from we_referable import TriggerEditorReferable
@@ -24,46 +25,39 @@ class TriggerType(TriggerEditorObject, TriggerEditorReferable):
         self.is_global = kwargs['is_global']
         self.comparable = kwargs['comparable']
         self.display_name = kwargs['display_name']
-        self.base_type = kwargs['base_type']
-        self.import_type = kwargs['import_type']
-        self.treat_as_base = kwargs['treat_as_base']
+        self.base_type = kwargs['base_type'] if 'base_type' in kwargs else None
+        self.import_type = kwargs['import_type'] if 'import_type' in kwargs else None
+        self.treat_as_base = kwargs['treat_as_base'] if 'treat_as_base' in kwargs else None
 
     def is_referenced(self):
-        pass
+        for function_ in iter_all_functions():
+            if self.name in function_.argument_types:
+                return True
+        return False
 
     def get_references(self):
-        pass
+        result = set()
+        for function_ in iter_all_functions():
+            if self.name in function_.argument_types:
+                result.add(function_)
+        return result
 
     @staticmethod
     def parse_from_text(block):
         # type: (list) -> dict
-        """
-        Parses a symbol declaration block, passed as a list of strings, where each element is a line.
-
-        Example:
-        [
-        'EnumDestructablesInCircleBJMultiple=1,real,location',
-        '_EnumDestructablesInCircleBJMultiple_Defaults=256,GetRectCenter',
-        '_EnumDestructablesInCircleBJMultiple_Category=TC_DESTRUCT',
-        '_EnumDestructablesInCircleBJMultiple_ScriptName=EnumDestructablesInCircleBJ',
-         ]
-
-         block[0] is the declaration line for the symbol, while block[1:] are lines for accessory parameters.
-
-        :param block:
-        :type block: list
-        :return:
-        :rtype: dict
-        """
+        kwargs = super(TriggerType, TriggerType).parse_from_text(block)
 
         declaration = get_line_data(block[0]).split(',')
 
-        kwargs = {'minimum_version': declaration[0],
-                  'is_global': declaration[1],
-                  'comparable': declaration[2],
-                  'display_name': declaration[3],
-                  'base_type': declaration[4],
-                  'import_type': declaration[5],
-                  'treat_as_base': declaration[6]
-                  }
+        kwargs['minimum_version'] = declaration[0]
+        kwargs['is_global'] = declaration[1]
+        kwargs['comparable'] = declaration[2]
+        kwargs['display_name'] = declaration[3]
+        try:
+            kwargs['base_type'] = declaration[4]
+            kwargs['import_type'] = declaration[5]
+            kwargs['treat_as_base'] = declaration[6]
+        except IndexError:
+            pass
+
         return kwargs

@@ -1,10 +1,9 @@
-from collections import Iterator
 from my_exceptions import TriggerObjectInUseException
 
 from utilities import get_line_data
 from we_object import TriggerEditorObject
-from we_function import TriggerEditorFunction
 from we_referable import TriggerEditorReferable
+from we_function import iter_all_functions
 
 
 class TriggerCategory(TriggerEditorObject, TriggerEditorReferable):
@@ -24,18 +23,8 @@ class TriggerCategory(TriggerEditorObject, TriggerEditorReferable):
         self.icon = kwargs['icon']
         self.disable_display = kwargs['disable_display'] if 'disable_display' in kwargs else 0
 
-    @staticmethod
-    def _get_functions():
-        # type: () -> Iterator[TriggerEditorFunction]
-        function_classes = [TriggerEditorFunction] + list(TriggerEditorFunction.get_subclasses())
-
-        for class_ in function_classes:
-            if class_.supports('Category'):
-                for function_ in class_.get_class_instances():
-                    yield function_
-
     def is_referenced(self):
-        for function_ in self._get_functions():
+        for function_ in iter_all_functions():
             if function_.block_params['Category'] == self:
                 return True
         return False
@@ -43,7 +32,7 @@ class TriggerCategory(TriggerEditorObject, TriggerEditorReferable):
     def get_references(self):
         result = set()
 
-        for function_ in self._get_functions():
+        for function_ in iter_all_functions():
             if function_.block_params['Category'] == self:
                 result.add(function_)
         return result

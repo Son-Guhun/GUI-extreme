@@ -23,7 +23,6 @@ class TriggerCall(TriggerEditorFunction):
         self.minimum_version = kwargs['minimum_version']
         self.events_flag = kwargs['events_flag']
         self.return_type = kwargs['return_type']
-        self.argument_types = kwargs['argument_types']
 
     @staticmethod
     def parse_from_text(block):

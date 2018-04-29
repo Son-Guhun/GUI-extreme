@@ -16,7 +16,6 @@ class TriggerAction(TriggerEditorFunction):
         super(TriggerAction, self).__init__(**kwargs)
 
         self.minimum_version = kwargs['minimum_version']
-        self.argument_types = kwargs['argument_types']
 
     @staticmethod
     def parse_from_text(block):
