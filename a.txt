@@ -1,3 +1,11 @@
+[TriggerEditorPackage]
+
+hello=1.0.0
+
+[TriggerEditorPakcageRequirements]
+
+
+
 //***************************************************************************
 [TriggerCategories]
 // Defines categories for organizing trigger functions

@@ -9,9 +9,12 @@ class NameTracker(collections.MutableMapping):
 
     Keys must be deleted before replacing them.
     """
-    def __init__(self, init_dict=None):
-        # type: (dict) -> None
-        self.instances = {}
+    def __init__(self, init_dict=None, internal_type=None):
+        # type: (collections.MutableMapping, type) -> None
+        if not internal_type:
+            self.instances = {}
+        else:
+            self.instances = internal_type()
         if init_dict:
             for key in init_dict:
                 self[key] = init_dict[key]
@@ -117,3 +120,38 @@ class ValidatedDict(collections.MutableMapping):
         if key not in self._valid_keys:
             raise TriggerSyntaxException("'"+str(key)+"'is not a valid argument.")
         return key in self._map
+
+
+class BlockParser(collections.Mapping):
+
+    def __getitem__(self, k):
+        # type: (str) -> list[list]
+        return self._map[k]
+
+    def __iter__(self):
+        for key in self._map:
+            yield key
+
+    def __len__(self):
+        len(self._map)
+
+    def __init__(self):
+        self._map = collections.OrderedDict()
+        self._category = ''
+        self._index = 0
+
+    def set_category(self, name, allow_any_order=True):
+        if name not in self._map:
+            self._map[name] = []
+        elif not allow_any_order:
+            raise TriggerSyntaxException('Category '+name+' already exists!')
+        self._category = name
+
+    def append_block(self):
+        self._map[self._category].append([])
+
+    def append_line(self, line):
+        try:
+            self._map[self._category][-1].append(line)
+        except IndexError:
+            raise TriggerSyntaxException('Block member found outside block!')
