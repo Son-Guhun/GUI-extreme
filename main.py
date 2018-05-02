@@ -10,8 +10,10 @@ import io
 def read_file(file_handle):
     contents = BlockParser()
     for line in file_handle:
-        line = line[:line.find('//')]  #
-        line = re.sub(r'\s+', '', line, flags=re.UNICODE)  # regex whitespace removal
+        line = line[:line.find('//')]
+        # regex whitespace removal => don't remove whitespaces that are between quotation marks
+        # https://stackoverflow.com/questions/9577930/regular-expression-to-select-all-whitespace-that-isnt-in-quotes
+        line = re.sub(r'\s+(?=(?:[^\'"]*[\'"][^\'"]*[\'"])*[^\'"]*$)', '', line, flags=re.UNICODE)
         if line != '':
             if line[0] == '[':
                 contents.set_category(line[1:-1])
@@ -23,29 +25,30 @@ def read_file(file_handle):
     return contents
 
 
-with io.open('a.txt', 'r', encoding="utf-8-sig") as f:
-    blocks = read_file(f)
+if __name__ == "__main__":
+    with io.open('a.txt', 'r', encoding="utf-8-sig") as f:
+        blocks = read_file(f)
 
-data = OrderedDict()
-for we_type in blocks:
-    try:
-        parser = weobj.TriggerEditorObjectParser(we_type)
-    except TriggerSyntaxException:
-        continue
-    data[we_type] = OrderedDict()
-    for block in blocks[we_type]:
-        # temp = parser.parse_block_to_object(block)
+    data = OrderedDict()
+    for we_type in blocks:
         try:
-            temp = parser.parse_block_to_object(block)
-        except TriggerSyntaxException as e:
-            print block
-            print e.message
+            parser = weobj.TriggerEditorObjectParser(we_type)
+        except TriggerSyntaxException:
             continue
-        data[we_type][temp.name] = temp
+        data[we_type] = OrderedDict()
+        for block in blocks[we_type]:
+            # temp = parser.parse_block_to_object(block)
+            try:
+                temp = parser.parse_block_to_object(block)
+            except TriggerSyntaxException as e:
+                print block
+                print e.message
+                continue
+            data[we_type][temp.name] = temp
 
-a = data.keys()
-easygui.choicebox('Hello', 'Choices', data[a[1]].keys())
+    a = data.keys()
+    easygui.choicebox('Hello', 'Choices', data[a[1]].keys())
 
-for name in data['TriggerCategories']:
-    print name
-    print data['TriggerCategories'][name].is_referenced()
+    for name in data['TriggerCategories']:
+        print name
+        print data['TriggerCategories'][name].is_referenced()
