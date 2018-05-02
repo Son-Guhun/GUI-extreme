@@ -48,7 +48,7 @@ class TriggerEditorObject(object):
 
     @classmethod
     def get_object_from_name(cls, name):
-        # type: (str) -> TriggerEditorObject
+        # type: (basestring) -> TriggerEditorObject
         try:
             return cls._instances[name]
         except KeyError:
