@@ -31,7 +31,7 @@ class TriggerEditorObject(object):
     @name.setter
     def name(self, new_name):
         # type: (basestring) -> None
-        self._instances[new_name] = self  # Exception will be raised if the symbol is already taken.
+        self._instances[new_name] = self
         self.__del__()
         self._name = new_name
 
