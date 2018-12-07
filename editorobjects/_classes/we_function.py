@@ -1,5 +1,6 @@
 from collections import Iterator
 
+
 from utilities import get_line_param, get_line_data
 from my_collections import ValidatedDict
 from we_object import TriggerEditorObject

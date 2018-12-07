@@ -11,7 +11,7 @@ import abc
 # ======================================================================================================================
 # Abstract and Generic classes
 # ======================================================================================================================
-from editorobjects import TriggerEditorObject
+from we_object import TriggerEditorObject
 
 
 class BlockParameter(object):

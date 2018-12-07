@@ -1,27 +1,40 @@
 import easygui
 from my_exceptions import TriggerSyntaxException
 import editorobjects as weobj
+import editorpackages as wepakg
 from collections import OrderedDict
 from my_collections import BlockParser
 import re
 import io
 
 
+def minimize_line(string):
+    # type: (str) -> str
+    """Removes all comments and whitespace from a line."""
+
+    string_uncommented = string[:string.find('//')]
+
+    # regex whitespace removal => don't remove whitespaces that are between quotation marks
+    # https://stackoverflow.com/questions/9577930/regular-expression-to-select-all-whitespace-that-isnt-in-quotes
+    return re.sub(r'\s+(?=(?:[^\'"]*[\'"][^\'"]*[\'"])*[^\'"]*$)', '', string_uncommented, flags=re.UNICODE)
+
+
+INDICATOR_CATEGORY = '['
+INDICATOR_BLOCK_MEMBER = '_'
+
+
 def read_file(file_handle):
     contents = BlockParser()
     for line in file_handle:
-        line = line[:line.find('//')]
-        # regex whitespace removal => don't remove whitespaces that are between quotation marks
-        # https://stackoverflow.com/questions/9577930/regular-expression-to-select-all-whitespace-that-isnt-in-quotes
-        line = re.sub(r'\s+(?=(?:[^\'"]*[\'"][^\'"]*[\'"])*[^\'"]*$)', '', line, flags=re.UNICODE)
+        line = minimize_line(line)
         if line != '':
-            if line[0] == '[':
-                contents.set_category(line[1:-1])
-            elif line[0] == '_':
-                contents.append_line(line)
+            if line[0] == INDICATOR_CATEGORY:
+                contents.new_category(line[1:-1])
+            elif line[0] == INDICATOR_BLOCK_MEMBER:
+                contents.add_line(line)
             else:
-                contents.append_block()
-                contents.append_line(line)
+                contents.new_block()
+                contents.add_line(line)
     return contents
 
 
@@ -52,3 +65,6 @@ if __name__ == "__main__":
     for name in data['TriggerCategories']:
         print name
         print data['TriggerCategories'][name].is_referenced()
+
+    user_package = wepakg.TriggerEditorPackage()
+

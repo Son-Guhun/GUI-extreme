@@ -140,17 +140,20 @@ class BlockParser(collections.Mapping):
         self._category = ''
         self._index = 0
 
-    def set_category(self, name, allow_any_order=True):
-        if name not in self._map:
-            self._map[name] = []
-        elif not allow_any_order:
-            raise TriggerSyntaxException('Category '+name+' already exists!')
+    def set_category(self, name):
+        raise NotImplementedError
+
+    def new_category(self, name):
+        if name in self._map:
+            raise TriggerSyntaxException('Category ' + name + ' already exists!')
+
+        self._map[name] = []
         self._category = name
 
-    def append_block(self):
+    def new_block(self):
         self._map[self._category].append([])
 
-    def append_line(self, line):
+    def add_line(self, line):
         try:
             self._map[self._category][-1].append(line)
         except IndexError:

@@ -25,6 +25,6 @@ class TriggerAction(TriggerEditorFunction):
         declaration = get_line_data(block[0]).split(',')
 
         kwargs['minimum_version'] = int(declaration[0])
-        kwargs['argument_types'] = declaration[3:]
+        kwargs['argument_types'] = declaration[1:]
 
         return kwargs
