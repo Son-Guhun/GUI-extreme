@@ -1,7 +1,6 @@
 # Find [TriggerCalls] line and place these actions above it
 from utilities import get_line_data
-from we_function import TriggerEditorFunction, BLOCK_PARAMETERS_NO_SCRIPTNAME
-
+from we_function import TriggerEditorFunction
 
 class TriggerAction(TriggerEditorFunction):
     """
@@ -28,3 +27,13 @@ class TriggerAction(TriggerEditorFunction):
         kwargs['argument_types'] = declaration[1:]
 
         return kwargs
+
+    def block_params_str(self):
+        r = []
+        for param in self.block_params:
+            r.append("_%s_%s=%s" % (self.name, param, self.block_params[param].value()))
+        return '\n'.join(r)
+
+    def convert_to_block(self):
+        return """%s=%s
+%s""" % (self.name, str(self.minimum_version) + ',' + ','.join(self.argument_types), self.block_params_str())

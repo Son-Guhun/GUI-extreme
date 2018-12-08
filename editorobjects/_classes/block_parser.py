@@ -11,13 +11,13 @@ from we_condition import TriggerCondition
 class TriggerEditorObjectParser(object):
     _DICT_STR2CLASS = OrderedDict({
         u'TriggerCategories': TriggerCategory,
-        u'TriggerTypes':             TriggerType,
+        u'TriggerTypes':               TriggerType,
         # u'TriggerTypeDefaults':      None,
         # u'TriggerParams':            None,
         # u'TriggerEvents':            None,
-        u'TriggerConditions': TriggerCondition,
-        u'TriggerActions': TriggerAction,
-        u'TriggerCalls': TriggerCall,
+        u'TriggerConditions':          TriggerCondition,
+        u'TriggerActions':             TriggerAction,
+        u'TriggerCalls':               TriggerCall,
         # u'DefaultTriggerCategories': None,
         # u'DefaultTriggers':          None
     })
