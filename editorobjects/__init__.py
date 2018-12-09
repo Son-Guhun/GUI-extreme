@@ -18,7 +18,6 @@ from _classes.block_parser import TriggerEditorObjectParser
 from _classes.we_call import TriggerCall
 
 
-
 for subclass_ in TriggerEditorObject.get_subclasses():
     TriggerEditorObject._class_sets[subclass_] = set()
     TriggerEditorObject._class_sets[TriggerEditorObject] = set()
