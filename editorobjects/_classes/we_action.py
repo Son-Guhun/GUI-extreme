@@ -2,6 +2,7 @@
 from utilities import get_line_data
 from we_function import TriggerEditorFunction
 
+
 class TriggerAction(TriggerEditorFunction):
     """
     [TriggerActions]
@@ -28,12 +29,7 @@ class TriggerAction(TriggerEditorFunction):
 
         return kwargs
 
-    def block_params_str(self):
-        r = []
-        for param in self.block_params:
-            r.append("_%s_%s=%s" % (self.name, param, self.block_params[param].value()))
-        return '\n'.join(r)
-
-    def convert_to_block(self):
-        return """%s=%s
-%s""" % (self.name, str(self.minimum_version) + ',' + ','.join(self.argument_types), self.block_params_str())
+    def params(self):
+        yield self.minimum_version
+        for argtype in self.argument_types:
+            yield argtype

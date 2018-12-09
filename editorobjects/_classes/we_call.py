@@ -37,3 +37,10 @@ class TriggerCall(TriggerEditorFunction):
         kwargs['argument_types'] = declaration[3:]
 
         return kwargs
+
+    def params(self):
+        yield self.minimum_version
+        yield self.events_flag
+        yield self.return_type
+        for argtype in self.argument_types:
+            yield argtype

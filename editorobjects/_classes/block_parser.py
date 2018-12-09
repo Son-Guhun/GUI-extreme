@@ -1,25 +1,27 @@
 from collections import OrderedDict
 
+from we_typedefaults import TriggerTypeDefault
 from my_exceptions import TriggerSyntaxException
 from we_type import TriggerType
 from we_call import TriggerCall
 from we_action import TriggerAction
 from we_category import TriggerCategory
 from we_condition import TriggerCondition
+from we_unknown import TriggerEditorUnknown
 
 
 class TriggerEditorObjectParser(object):
     _DICT_STR2CLASS = OrderedDict({
         u'TriggerCategories': TriggerCategory,
         u'TriggerTypes':               TriggerType,
-        # u'TriggerTypeDefaults':      None,
-        # u'TriggerParams':            None,
-        # u'TriggerEvents':            None,
+        u'TriggerTypeDefaults':      TriggerTypeDefault,
+        u'TriggerParams':            TriggerEditorUnknown,
+        u'TriggerEvents':            TriggerEditorUnknown,
         u'TriggerConditions':          TriggerCondition,
         u'TriggerActions':             TriggerAction,
         u'TriggerCalls':               TriggerCall,
-        # u'DefaultTriggerCategories': None,
-        # u'DefaultTriggers':          None
+        u'DefaultTriggerCategories': TriggerEditorUnknown,
+        u'DefaultTriggers':          TriggerEditorUnknown
     })
 
     def __init__(self, string=''):

@@ -16,6 +16,11 @@ class TriggerCategory(TriggerEditorObject, TriggerEditorReferable):
         Value 2: Optional flag (defaults to 0) indicating to disable display of category name
     """
 
+    def params(self):
+        yield self.display_text
+        yield self.icon
+        yield self.disable_display
+
     def __init__(self, **kwargs):
         super(TriggerCategory, self).__init__(**kwargs)
 

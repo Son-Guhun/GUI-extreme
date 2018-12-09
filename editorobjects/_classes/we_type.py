@@ -2,6 +2,7 @@ from we_function import iter_all_functions
 from utilities import get_line_data
 from we_object import TriggerEditorObject
 from we_referable import TriggerEditorReferable
+from my_types import IntBool, WC3Version
 
 
 class TriggerType(TriggerEditorObject, TriggerEditorReferable):
@@ -21,13 +22,25 @@ class TriggerType(TriggerEditorObject, TriggerEditorReferable):
     def __init__(self, **kwargs):
         super(TriggerType, self).__init__(**kwargs)
 
-        self.minimum_version = kwargs['minimum_version']
-        self.is_global = kwargs['is_global']
-        self.comparable = kwargs['comparable']
+        self.minimum_version = WC3Version(kwargs['minimum_version'])
+        self.is_global = IntBool(kwargs['is_global'])
+        self.comparable = IntBool(kwargs['comparable'])
         self.display_name = kwargs['display_name']
         self.base_type = kwargs['base_type'] if 'base_type' in kwargs else None
         self.import_type = kwargs['import_type'] if 'import_type' in kwargs else None
-        self.treat_as_base = kwargs['treat_as_base'] if 'treat_as_base' in kwargs else None
+        self.treat_as_base = IntBool(kwargs['treat_as_base']) if 'treat_as_base' in kwargs else None
+
+    def params(self):
+        yield self.minimum_version
+        yield self.is_global
+        yield self.comparable
+        yield self.display_name
+        if self.base_type:
+            yield self.base_type
+        if self.import_type:
+            yield self.import_type
+        if self.treat_as_base:
+            yield self.treat_as_base
 
     def is_referenced(self):
         for function_ in iter_all_functions():
@@ -56,8 +69,9 @@ class TriggerType(TriggerEditorObject, TriggerEditorReferable):
         try:
             kwargs['base_type'] = declaration[4]
             kwargs['import_type'] = declaration[5]
-            kwargs['treat_as_base'] = declaration[6]
+            kwargs['treat_as_base'] = declaration[6]  # TODO: Test what this does and see if it works with all types
         except IndexError:
+            # Index error occurred because optional parameters were not declared!
             pass
 
         return kwargs

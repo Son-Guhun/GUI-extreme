@@ -39,3 +39,8 @@ class TriggerCondition(TriggerEditorFunction):
                self.minimum_version,
                ",".join(self.argument_types))
 
+    def params(self):
+        yield self.minimum_version
+        for argtype in self.argument_types:
+            yield argtype
+

@@ -1,4 +1,5 @@
 from typing import Dict
+import abc
 
 from utilities import get_line_key
 from my_collections import NameTracker
@@ -8,6 +9,15 @@ from my_exceptions import TriggerSyntaxException
 class TriggerEditorObject(object):
     _instances = NameTracker()
     _class_sets = {}  # type: Dict[class, set]
+
+    """
+    An abstract class that represents an object which can be referenced by other objects within TriggerData.txt.
+    """
+    __metaclass__ = abc.ABCMeta
+
+    @abc.abstractmethod
+    def params(self):
+        yield None
 
     def __init__(self, **kwargs):
         super(TriggerEditorObject, self).__init__()
@@ -25,15 +35,18 @@ class TriggerEditorObject(object):
 
     @property
     def name(self):
-        # type: () -> basestring
+        # type: () -> str
         return self._name
 
     @name.setter
     def name(self, new_name):
-        # type: (basestring) -> None
+        # type: (str) -> None
         self._instances[new_name] = self
         self.__del__()
         self._name = new_name
+
+    def __str__(self):
+        return self._name
 
     @classmethod
     def get_class_instances(cls):
@@ -48,7 +61,7 @@ class TriggerEditorObject(object):
 
     @classmethod
     def get_object_from_name(cls, name):
-        # type: (basestring) -> TriggerEditorObject
+        # type: (str) -> TriggerEditorObject
         try:
             return cls._instances[name]
         except KeyError:
@@ -78,3 +91,6 @@ class TriggerEditorObject(object):
 
         kwargs = {'name': get_line_key(block[0])}
         return kwargs
+
+    def convert_to_block(self):
+        return "%s=%s" % (self.name, ','.join((str(param) for param in self.params())))

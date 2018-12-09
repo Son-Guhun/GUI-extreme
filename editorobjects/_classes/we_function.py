@@ -1,4 +1,5 @@
 from collections import Iterator
+import abc
 
 
 from utilities import get_line_param, get_line_data
@@ -13,6 +14,14 @@ BLOCK_PARAMETERS_NO_SCRIPTNAME = BLOCK_PARAMETERS_ALL - {'ScriptName'}
 
 class TriggerEditorFunction(TriggerEditorObject):
     _VALID_BLOCK_PARAMETERS = BLOCK_PARAMETERS_ALL
+
+    __metaclass__ = abc.ABCMeta
+
+    def convert_to_block(self):
+        return "%s=%s\n%s" % (self.name, ','.join((str(x) for x in self.params())), '\n'.join(self.block_params_str()))
+
+    def block_params_str(self):
+        return (("_%s_%s=%s" % (self.name, param, str(value))) for param, value in self.block_params.items())
 
     def __init__(self, **kwargs):
         self.block_params = ValidatedDict(self._VALID_BLOCK_PARAMETERS)
