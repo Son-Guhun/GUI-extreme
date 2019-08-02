@@ -13,15 +13,16 @@ BLOCK_PARAMETERS_NO_SCRIPTNAME = BLOCK_PARAMETERS_ALL - {'ScriptName'}
 
 
 class TriggerEditorFunction(TriggerEditorObject):
+    """
+    This class represents a TriggerEditorObject that generates a JASS function. These kinds objects aren't necessarily
+    declared in a single line, but also have blocks which are lines preceded by an underscore below it. A block ends on
+    the next line that does not start in an underscore.
+
+    Block parameters are represented by the classes in the blockparameters module.
+    """
     _VALID_BLOCK_PARAMETERS = BLOCK_PARAMETERS_ALL
 
     __metaclass__ = abc.ABCMeta
-
-    def convert_to_block(self):
-        return "%s=%s\n%s" % (self.name, ','.join((str(x) for x in self.params())), '\n'.join(self.block_params_str()))
-
-    def block_params_str(self):
-        return (("_%s_%s=%s" % (self.name, param, str(value))) for param, value in self.block_params.items())
 
     def __init__(self, **kwargs):
         self.block_params = ValidatedDict(self._VALID_BLOCK_PARAMETERS)
@@ -39,6 +40,7 @@ class TriggerEditorFunction(TriggerEditorObject):
     @classmethod
     def supports(cls, keyword_arg):
         # type: (basestring) -> bool
+        """According to testing, TriggerEvents and TriggerCalls do not support the Scriptname block parameter."""
         return keyword_arg in cls._VALID_BLOCK_PARAMETERS
 
     @staticmethod
@@ -51,6 +53,12 @@ class TriggerEditorFunction(TriggerEditorObject):
             kwargs[param] = parse_block_parameter(param, get_line_data(line))
 
         return kwargs
+
+    def convert_to_block(self):
+        return "%s=%s\n%s" % (self.name, ','.join((str(x) for x in self.params())), '\n'.join(self.block_params_str()))
+
+    def block_params_str(self):
+        return (("_%s_%s=%s" % (self.name, param, str(value))) for param, value in self.block_params.items())
 
 
 # ======================================================================================================================

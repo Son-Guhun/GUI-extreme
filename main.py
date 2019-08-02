@@ -68,3 +68,11 @@ if __name__ == "__main__":
 
     user_package = wepakg.TriggerEditorPackage()
 
+
+"""
+with open("b.txt","w") as f:
+    for a in data:
+        f.write("[{}]\n\n\n\n".format(a))
+        for n in data[a]:
+            f.write(data[a][n].convert_to_block() + '\n')
+"""

@@ -17,6 +17,12 @@ class TriggerEditorObject(object):
 
     @abc.abstractmethod
     def params(self):
+        """
+        Yields the parameters declared after the equals sign in the object's declaration. Params don't necessarily
+        have the string type. If you need strings, use (str(x) for x in .params()).
+
+        :rtype: str(x) for every value x yielded by this generator must return the correct string in the final .txt file
+        """
         yield None
 
     def __init__(self, **kwargs):

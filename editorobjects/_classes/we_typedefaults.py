@@ -4,11 +4,6 @@ from we_object import TriggerEditorObject
 
 class TriggerTypeDefault(TriggerEditorObject):
 
-    def params(self):
-        yield self.script_text
-        if self.display_text:
-            yield self.display_text
-
     def __init__(self, **kwargs):
         super(TriggerTypeDefault, self).__init__(**kwargs)
         self.script_text = kwargs['script_text']
@@ -41,6 +36,11 @@ class TriggerTypeDefault(TriggerEditorObject):
         if len(declaration) > 1:
             kwargs['display_text'] = declaration[1]
         return kwargs
+
+    def params(self):
+        yield self.script_text
+        if self.display_text:
+            yield self.display_text
 
     def convert_to_block(self):
         return "%s=%s" % (self.name.replace("_DEFAULT_", ""), ','.join((str(param) for param in self.params())))
